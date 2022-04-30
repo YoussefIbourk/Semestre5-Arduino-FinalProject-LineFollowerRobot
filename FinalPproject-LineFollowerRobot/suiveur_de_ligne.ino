@@ -1,0 +1,96 @@
+#define capteurGauche 11
+#define capteurDroite 12
+
+//s'il capte la couleur noire le capteur s'allume, donc si
+//valeurDroite==1 && valeurGauche == 1 ==> ligne blanche
+//valeurDroite==0 && valeurGauche == 0 ==> ligne noire
+//capteur D = 0 ==> moteur D = 1
+//capteur G = 0 ==> moteur G = 1
+
+#define brocheMoteur1a 3 // Premier moteur
+#define brocheMoteur1b 4 // Premier moteur
+#define brocheEnable1 9 // broche enable du L298N pour le premier moteur
+#define brocheMoteur2a 5 // Deuxième moteur
+#define brocheMoteur2b 6 // Deuxième moteur
+#define brocheEnable2 10 //  broche enable du L298N pour le deuxième moteur
+
+
+int initialDroite; // état initial du capteur de droite
+int initialGauche; // état initial du capteur de gauche
+
+int vitesse = 180; 
+int turn_speed = 20;    // MAX 255 
+int turn_delay = 10;
+
+
+void setup() {
+
+  // réglage des sorties
+  pinMode(brocheMoteur1a, OUTPUT);
+  pinMode(brocheMoteur1b, OUTPUT);
+  pinMode(brocheEnable1, OUTPUT);
+  pinMode(brocheMoteur2a, OUTPUT);
+  pinMode(brocheMoteur2b, OUTPUT);
+  pinMode(brocheEnable2, OUTPUT);
+
+  // on demeure immobile pour l'instant
+  digitalWrite(brocheEnable1, 0);
+  digitalWrite(brocheEnable2, 0);
+
+  // réglage en marche avant
+  digitalWrite(brocheMoteur1a, LOW);
+  digitalWrite(brocheMoteur1b, HIGH);
+  digitalWrite(brocheMoteur2a, LOW);
+  digitalWrite(brocheMoteur2b, HIGH);
+
+  delay(2000); // on se donne le temps de placer le robot à son point de départ
+
+  // lecture des valeurs initiales (on suppose que les capteurs sont de part et d'autre de la ligne)
+  initialDroite = analogRead(capteurDroite);
+  initialGauche = analogRead(capteurGauche);
+
+}
+
+void loop() {
+  int valeurDroite, valeurGauche;
+
+  valeurDroite = digitalRead(capteurDroite);
+  valeurGauche = digitalRead(capteurGauche);
+
+  if (valeurDroite==0 && valeurGauche ==0) {
+    // on continue tout droit
+    analogWrite(brocheEnable1, vitesse);
+    analogWrite(brocheEnable2, vitesse);
+  }
+  else if (valeurDroite==1 && valeurGauche == 0) {
+    // on tourne à gauche
+    digitalWrite(brocheEnable1, 0);
+    digitalWrite(brocheEnable2, 0);
+
+    delay(150);
+    
+    digitalWrite(brocheEnable1, 180);
+    analogWrite(brocheEnable2, turn_speed);
+  }
+
+  else if (valeurDroite==0 && valeurGauche ==1) {
+    // on tourne à droite
+    digitalWrite(brocheEnable1, 0);
+    digitalWrite(brocheEnable2, 0);
+
+    delay(150);
+    
+    digitalWrite(brocheEnable2, 180);
+    analogWrite(brocheEnable1, turn_speed); 
+    //delay(turn_delay);
+
+  }
+
+  else if (valeurDroite==1 && valeurGauche == 1){
+    // on s'arrête
+    digitalWrite(brocheEnable1, 0);
+    digitalWrite(brocheEnable2, 0);
+  }
+
+  delay(100);
+}
